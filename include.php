@@ -10,5 +10,6 @@
 <script src='network-code.js'></script>
 
 <?php
+   date_default_timezone_set('America/New_York');
    //include 'network-code.php';
 ?>

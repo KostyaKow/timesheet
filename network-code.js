@@ -17,22 +17,21 @@ function post_with_redirect(path, params, method) {
             form.appendChild(hiddenField);
          }
     }
-
     document.body.appendChild(form);
     form.submit();
 }
 
 function post_old(url, data) {
-  if (window.XMLHttpRequest) {
-   xmlhttp = new XMLHttpRequest();
-  } else {
-   xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
-  }
-  var url = "Serv?req_id=" + data;
-  xmlhttp.open("POST", url, false);
-  xmlhttp.send(null);
-  var respo= xmlhttp.responseText;
-  document.getElementById("some_id").innerHTML = xmlhttp.responseText;
+   if (window.XMLHttpRequest)
+      xmlhttp = new XMLHttpRequest();
+   else
+      xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+
+   var url = "Serv?req_id=" + data;
+   xmlhttp.open("POST", url, false);
+   xmlhttp.send(null);
+   var respo= xmlhttp.responseText;
+   document.getElementById("some_id").innerHTML = xmlhttp.responseText;
 }
 
 function post(url, data) {
