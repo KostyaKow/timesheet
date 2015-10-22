@@ -74,8 +74,49 @@
       //////////////////////////////////////////
       var dailyTable = $('#daily-sum');
       var dbody = dailyTable.find('tbody');
+      var dateSorted = {}
 
-      var totalTimeToday = 0, currTimeStart = 0, reportDate = -1, currDay = -1;
+      for (var e in data) {
+         var entry = data[e];
+         var entryDate = new Date(e * 1000);
+         var entryDateKey = entryDate.getDate() + '/' + (entryDate.getMonth() + 1) + '/' + (1900 + entryDate.getYear());
+         if (dateSorted[entryDateKey] == null) {
+            dateSorted[entryDateKey] = []
+         }
+         entry['time'] = e;
+         dateSorted[entryDateKey].push(entry);
+      }
+      
+      for (var dateIndex in dateSorted) {
+         var currDayArr = dateSorted[dateIndex];
+
+         //document.write(currDayArr + '................' + e + '<br>');
+         var totalTimeToday = 0;
+         var timeStart;
+         var clocking = false;
+         
+         for (var entryIndex in currDayArr) {
+            var entry = currDayArr[entryIndex];
+            var entryDate = new Date(entry['time'] * 1000);
+            if (entry['action'] == 'clockin' && !clocking) {
+               timeStart = entryDate;
+               clocking = true;
+            }
+            else if (entry['action'] == 'clockout' && clocking) {
+               clocking = false;
+               totalTimeToday += getMilliDay(entryDate) - getMilliDay(timeStart);
+            }
+         }
+         var dateTd = $('<td>').text(dateIndex);
+         var numHours = totalTimeToday / 60 / 60 / 60;
+         var numHoursRounded = Math.round(100 * numHours) / 100;
+         var totalTimeTd = $('<td>').text(numHoursRounded);
+         var tr = $('<tr>').append(dateTd).append(totalTimeTd);
+         dbody.append(tr); 
+      } 
+      //DO A DICTIONARY WITH EVERY ENTRY SORTED BY DATE AND MONTH.
+      //THEN LOOP THRU AND PARSE THEM EACH SEPARATELY
+      /*var totalTimeToday = 0, currTimeStart = 0, reportDate = -1, currDay = -1;
 
       for (var e in data) {
          var entryDate = new Date(e * 1000);
@@ -115,7 +156,7 @@
             currTimeStart = 0;
          }
          //////////////////////////////////////////
-      }
+      }*/
    }
 
    </script>
