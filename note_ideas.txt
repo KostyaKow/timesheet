@@ -1,3 +1,7 @@
+Instead of having 3 tables, have 2
+   -1 weekly summary
+   -1 daily summary
+   -click on individual days to see breakdown by clock-in/clock-outs
 Use moment.js
 Date calculations in UTC
 Secure log-in

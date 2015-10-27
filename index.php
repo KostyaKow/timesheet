@@ -82,13 +82,19 @@
 
    var milliInDay = 1000 * 60 * 60 * 24;
    var milliInWeek = milliInDay * 7;
-   function getNumWeeksSinceEpoch(milli) {
-      milli = milli - (milliInDay*2);
-      var numWeeks = (milli - (milli % milliInWeek)) / milliInWeek;
+   function getNumWeeksSinceEpoch1(milli) {
+      var milliSinceWeekStart = milli - (milli % milliInWeek);
+
+      milliSinceWeekStart = milliSinceWeekStart - (milliInDay*2);
+      var numWeeks = milliSinceWeekStart / milliInWeek;
       return numWeeks;
    }
+
+   function getNumWeeksSinceEpoch(milli) {
+      return Math.floor(milli / milliInWeek);
+   }
    function jsDateFromEpochWeek(weekN) {
-      return new Date(weekN*milliInWeek + milliInDay*2);
+      return new Date(weekN*milliInWeek);
    }
    function addTableStuff(data) {
       var data = $.parseJSON(data);
@@ -158,7 +164,7 @@
             }
          }
          if (first) {
-            currWeek = getNumWeeksSinceEpoch(currDayArr[0]['time']*1000);
+            currWeek = getNumWeeksSinceEpoch(entry['time']*1000);
             first = false;
          }
 
@@ -174,7 +180,7 @@
          //var firstEntryDate = new Date(firstEntry['time'] * 1000);
          var epochWeek = getNumWeeksSinceEpoch(firstEntry['time'] * 1000);
          var beginningWeek = formatJsDate(jsDateFromEpochWeek(epochWeek));
-
+         document.write(beginningWeek + ' ');
          if (currWeek != epochWeek) { //gotta get down on Friday
             var weekTd = $('<td>').text(beginningWeek);
             var weekTimeTd = $('<td>').text(milliToHours(weeklyTotal, 2));
