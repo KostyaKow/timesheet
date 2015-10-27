@@ -12,9 +12,7 @@
          width: 95%;
          border-collapse: separate;
          border-radius: 4px;
-
       }
-
       .section {
          font-size: 150%;
          text-align: center;
@@ -44,7 +42,54 @@
    function getMilliDay(d) {
       return d.getMilliseconds() + d.getSeconds()*60 + d.getMinutes()*60*60 + d.getHours()*60*60*60;
    }
+   function pow(n, p) {
+      if (p > 1)
+         return n * pow(n, p-1);
+      else
+         return n;
+   }
+   function fixYear(n) {
+      return 1900 + n; //-2000 so prints 15 instead of 2015
+   }
+   function milliToHours(milli, round) {
+      var numHours = milli / 60 / 60 / 60;
+      var round = pow(10, round);
+      var numHoursRounded = Math.round(round * numHours) / round;
+      return numHoursRounded;
+   }
+   //converts long Date string to something like 27/04/2015
+   function formatJsDate(d) {
+      return d.getDate() + '/' + (d.getMonth() + 1) + '/' + (1900 + d.getYear());
+   }
+   function dayNumToName(n) {
+      if (n == 0)
+         return 'Sunday';
+      else if (n == 1)
+         return 'Monday';
+      else if (n == 2)
+         return 'Tuesday';
+      else if (n == 3)
+         return 'Wednesday';
+      else if (n == 4)
+         return 'Thursday';
+      else if (n == 5)
+         return 'Friday';
+      else if (n == 6)
+         return 'Saturday';
+      else
+         return 'Bad day of the week'; 
+   }
 
+   var milliInDay = 1000 * 60 * 60 * 24;
+   var milliInWeek = milliInDay * 7;
+   function getNumWeeksSinceEpoch(milli) {
+      milli = milli - (milliInDay*2);
+      var numWeeks = (milli - (milli % milliInWeek)) / milliInWeek;
+      return numWeeks;
+   }
+   function jsDateFromEpochWeek(weekN) {
+      return new Date(weekN*milliInWeek + milliInDay*2);
+   }
    function addTableStuff(data) {
       var data = $.parseJSON(data);
       var t = $('#timeTable');
@@ -74,19 +119,24 @@
       //////////////////////////////////////////
       var dailyTable = $('#daily-sum');
       var dbody = dailyTable.find('tbody');
+
+      var weeklyTable = $('#weekly-sum');
+      var wbody = weeklyTable.find('tbody');
+
       var dateSorted = {}
+      var weeklyTotal = 0;
+      var currWeek = -1;
 
       for (var e in data) {
          var entry = data[e];
          var entryDate = new Date(e * 1000);
-         var entryDateKey = entryDate.getDate() + '/' + (entryDate.getMonth() + 1) + '/' + (1900 + entryDate.getYear());
-         if (dateSorted[entryDateKey] == null) {
+         var entryDateKey = formatJsDate(entryDate);
+         if (dateSorted[entryDateKey] == null)
             dateSorted[entryDateKey] = []
-         }
          entry['time'] = e;
          dateSorted[entryDateKey].push(entry);
       }
-      
+      var first = true;
       for (var dateIndex in dateSorted) {
          var currDayArr = dateSorted[dateIndex];
 
@@ -94,7 +144,7 @@
          var totalTimeToday = 0;
          var timeStart;
          var clocking = false;
-         
+
          for (var entryIndex in currDayArr) {
             var entry = currDayArr[entryIndex];
             var entryDate = new Date(entry['time'] * 1000);
@@ -107,58 +157,34 @@
                totalTimeToday += getMilliDay(entryDate) - getMilliDay(timeStart);
             }
          }
-         var dateTd = $('<td>').text(dateIndex);
-         var numHours = totalTimeToday / 60 / 60 / 60;
-         var numHoursRounded = Math.round(100 * numHours) / 100;
-         var totalTimeTd = $('<td>').text(numHoursRounded);
+         if (first) {
+            currWeek = getNumWeeksSinceEpoch(currDayArr[0]['time']*1000);
+            first = false;
+         }
+
+         //add stuff to daily table
+         var dateTd = $('<td>').text(dayNumToName(entryDate.getDay()) + ' ' + dateIndex);
+         var totalTimeTd = $('<td>').text(milliToHours(totalTimeToday, 1));
          var tr = $('<tr>').append(dateTd).append(totalTimeTd);
          dbody.append(tr); 
-      } 
-      //DO A DICTIONARY WITH EVERY ENTRY SORTED BY DATE AND MONTH.
-      //THEN LOOP THRU AND PARSE THEM EACH SEPARATELY
-      /*var totalTimeToday = 0, currTimeStart = 0, reportDate = -1, currDay = -1;
 
-      for (var e in data) {
-         var entryDate = new Date(e * 1000);
-         var entryDay = entryDate.getDate();
-         var action = data[e]['action'];
+         //weekly table
+         weeklyTotal += totalTimeToday;
+         var firstEntry = currDayArr[0];
+         //var firstEntryDate = new Date(firstEntry['time'] * 1000);
+         var epochWeek = getNumWeeksSinceEpoch(firstEntry['time'] * 1000);
+         var beginningWeek = formatJsDate(jsDateFromEpochWeek(epochWeek));
 
-         //print summary if timeD and day (from curStart) differ
-         if (entryDay != currDay && currDay != -1) {
-            var d1 = reportDate.getDate();
-            var m1 = reportDate.getMonth() + 1;
-            var dateTd = $('<td>').text(d1 + '/' + m1);
-            var dateTotalTimeTd = $('<td>').text(totalTimeToday / 60 / 60);
-            var myTr = $('<tr>').append(dateTd).append(dateTotalTimeTd);
-            dbody.append(myTr);
-            totalTimeToday = currTimeStart = 0;
-            currDay = entryDay;
-            reportDate = entryDate;
-            continue;
+         if (currWeek != epochWeek) { //gotta get down on Friday
+            var weekTd = $('<td>').text(beginningWeek);
+            var weekTimeTd = $('<td>').text(milliToHours(weeklyTotal, 2));
+            var tr = $('<tr>').append(weekTd).append(weekTimeTd);
+            wbody.append(tr);
+            weeklyTotal = 0;
+            currWeek = epochWeek;
          }
-         if (currDay == -1) {
-            currDay = entryDay;
-            reportDate = entryDate;
-         }
-
-         //if clocked-in but not today then reset and clock in
-         if (action == 'clockin' && currTimeStart != 0) {
-            if (entryDay != currTimeStart.getDay())
-               currTimeStart = entryDate;
-         }
-         //if not clocked in then clock in
-         else if (action == 'clockin' && currTimeStart == 0) {
-            currTimeStart = entryDate;
-         }
-         //if clocked in then clock out
-         else if (action == 'clockout' && currTimeStart != 0) {
-            totalTimeToday += getMilliDay(entryDate) - getMilliDay(currTimeStart);
-            currTimeStart = 0;
-         }
-         //////////////////////////////////////////
-      }*/
+      }
    }
-
    </script>
 </head>
 <body>

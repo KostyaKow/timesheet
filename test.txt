@@ -1,0 +1,8 @@
+Use moment.js
+Date calculations in UTC
+Secure log-in
+Biometrics
+Don't process everything at once
+Support HTML5 and cameras
+Check ratina of user
+Use database instead of JSON/Data archiving
