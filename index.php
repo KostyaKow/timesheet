@@ -1,30 +1,13 @@
 <html>
 <head>
    <?php include 'include.php'; ?>
-   <style>
-      .today {
-         background-color: red;
-         border-radius:    10px;
-      }
-      .table {
-         border: 2px solid black;
-         margin: 15px;
-         width: 95%;
-         border-collapse: separate;
-         border-radius: 4px;
-      }
-      .section {
-         font-size: 150%;
-         text-align: center;
-         padding-top: 20px;
-      }
-   </style>
+   <script src='misc.js'></script>
+   <link rel='stylesheet' type='text/css' href='style.css'>
 
    <script>
    $(
    function () {
       //$('.table').addClass('table-curved');
-
       $('.tbtn').addClass('btn');
       $('.tbtn').addClass('btn-default');
 
@@ -36,49 +19,6 @@
          post('network-code.php', data)
       });
    });
-
-
-   //Time milliseconds since beginning of the day
-   function getMilliDay(d) {
-      return d.getMilliseconds() + d.getSeconds()*60 + d.getMinutes()*60*60 + d.getHours()*60*60*60;
-   }
-   function pow(n, p) {
-      if (p > 1)
-         return n * pow(n, p-1);
-      else
-         return n;
-   }
-   function fixYear(n) {
-      return 1900 + n; //-2000 so prints 15 instead of 2015
-   }
-   function milliToHours(milli, round) {
-      var numHours = milli / 60 / 60 / 60;
-      var round = pow(10, round);
-      var numHoursRounded = Math.round(round * numHours) / round;
-      return numHoursRounded;
-   }
-   //converts long Date string to something like 27/04/2015
-   function formatJsDate(d) {
-      return d.getDate() + '/' + (d.getMonth() + 1) + '/' + (1900 + d.getYear());
-   }
-   function dayNumToName(n) {
-      if (n == 0)
-         return 'Sunday';
-      else if (n == 1)
-         return 'Monday';
-      else if (n == 2)
-         return 'Tuesday';
-      else if (n == 3)
-         return 'Wednesday';
-      else if (n == 4)
-         return 'Thursday';
-      else if (n == 5)
-         return 'Friday';
-      else if (n == 6)
-         return 'Saturday';
-      else
-         return 'Bad day of the week'; 
-   }
 
    var milliInDay = 1000 * 60 * 60 * 24;
    var milliInWeek = milliInDay * 7;
@@ -163,16 +103,19 @@
                totalTimeToday += getMilliDay(entryDate) - getMilliDay(timeStart);
             }
          }
-         if (first) {
-            currWeek = getNumWeeksSinceEpoch(entry['time']*1000);
-            first = false;
-         }
 
          //add stuff to daily table
          var dateTd = $('<td>').text(dayNumToName(entryDate.getDay()) + ' ' + dateIndex);
          var totalTimeTd = $('<td>').text(milliToHours(totalTimeToday, 1));
          var tr = $('<tr>').append(dateTd).append(totalTimeTd);
          dbody.append(tr); 
+      }
+
+      for (var dateIndex in dateSorted) {
+         /*if (first) {
+            currWeek = getNumWeeksSinceEpoch(entry['time']*1000);
+            first = false;
+         }*/
 
          //weekly table
          weeklyTotal += totalTimeToday;

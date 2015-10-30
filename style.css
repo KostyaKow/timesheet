@@ -1,0 +1,17 @@
+.today {
+   background-color: red;
+   border-radius:    10px;
+}
+.table {
+   border: 2px solid black;
+   margin: 15px;
+   width: 95%;
+   border-collapse: separate;
+   border-radius: 4px;
+}
+.section {
+   font-size: 150%;
+   text-align: center;
+   padding-top: 20px;
+}
+
