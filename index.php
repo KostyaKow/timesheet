@@ -20,22 +20,6 @@
       });
    });
 
-   var milliInDay = 1000 * 60 * 60 * 24;
-   var milliInWeek = milliInDay * 7;
-   function getNumWeeksSinceEpoch1(milli) {
-      var milliSinceWeekStart = milli - (milli % milliInWeek);
-
-      milliSinceWeekStart = milliSinceWeekStart - (milliInDay*2);
-      var numWeeks = milliSinceWeekStart / milliInWeek;
-      return numWeeks;
-   }
-
-   function getNumWeeksSinceEpoch(milli) {
-      return Math.floor(milli / milliInWeek);
-   }
-   function jsDateFromEpochWeek(weekN) {
-      return new Date(weekN*milliInWeek);
-   }
    function addTableStuff(data) {
       var data = $.parseJSON(data);
       var t = $('#timeTable');
@@ -70,29 +54,26 @@
       var wbody = weeklyTable.find('tbody');
 
       var dateSorted = {}
-      var weeklyTotal = 0;
+      var weeklyTotal = {};
       var currWeek = -1;
 
       for (var e in data) {
-         var entry = data[e];
-         var entryDate = new Date(e * 1000);
-         var entryDateKey = formatJsDate(entryDate);
-         if (dateSorted[entryDateKey] == null)
-            dateSorted[entryDateKey] = []
-         entry['time'] = e;
-         dateSorted[entryDateKey].push(entry);
+         var entryDate = formatJsDate(new Date(e * 1000));
+         if (dateSorted[entryDate] == null)
+            dateSorted[entryDate] = []
+         data[e]['time'] = e;
+         dateSorted[entryDate].push(data[e]);
       }
-      var first = true;
-      for (var dateIndex in dateSorted) {
-         var currDayArr = dateSorted[dateIndex];
+      for (var entryDate in dateSorted) {
+         var currDayArr = dateSorted[entryDate];
 
-         //document.write(currDayArr + '................' + e + '<br>');
          var totalTimeToday = 0;
          var timeStart;
          var clocking = false;
 
+         var entry = 1;
          for (var entryIndex in currDayArr) {
-            var entry = currDayArr[entryIndex];
+            entry = currDayArr[entryIndex];
             var entryDate = new Date(entry['time'] * 1000);
             if (entry['action'] == 'clockin' && !clocking) {
                timeStart = entryDate;
@@ -104,18 +85,34 @@
             }
          }
 
+         var time = entry['time'];
+         var weekN = getNumWeeksSinceEpoch(time * 1000);
+         if (weeklyTotal[weekN] == null)
+            weeklyTotal[weekN] = { 'time' : time, 'total' : 0 };
+         weeklyTotal[weekN]['total'] += totalTimeToday;
+
          //add stuff to daily table
-         var dateTd = $('<td>').text(dayNumToName(entryDate.getDay()) + ' ' + dateIndex);
+         var dateTd = $('<td>').text(dayNumToName(entryDate.getDay()) + ' ' + entryDate);
          var totalTimeTd = $('<td>').text(milliToHours(totalTimeToday, 1));
          var tr = $('<tr>').append(dateTd).append(totalTimeTd);
          dbody.append(tr); 
       }
 
-      for (var dateIndex in dateSorted) {
-         /*if (first) {
+      for (var week in weeklyTotal) {
+         var entry = weeklyTotal[week];
+         var total = entry['total'];
+         var displayWeek = entry['time'];
+
+         document.write(week);
+         document.write(weeklyTotal[week].toSource());
+         document.write('cake');
+      }
+
+      /*for (var entryDate in dateSorted) {
+         if (first) {
             currWeek = getNumWeeksSinceEpoch(entry['time']*1000);
             first = false;
-         }*/
+         }
 
          //weekly table
          weeklyTotal += totalTimeToday;
@@ -132,7 +129,7 @@
             weeklyTotal = 0;
             currWeek = epochWeek;
          }
-      }
+      }*/
    }
    </script>
 </head>

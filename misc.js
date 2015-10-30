@@ -21,9 +21,18 @@ function milliToHours(milli, round) {
 function formatJsDate(d) {
    return d.getDate() + '/' + (d.getMonth() + 1) + '/' + (1900 + d.getYear());
 }
-function dayNumToName(n) {
+function dayNumToName(day) {
    var days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-   if (days < 0 || day > 6)
+   if (day < 0 || day > 6)
       return 'Bad day of the week'; 
-   else return days[n];
+   else return days[day];
+}
+
+milliInDay = 1000 * 60 * 60 * 24;
+milliInWeek = milliInDay * 7;
+function getNumWeeksSinceEpoch(milli) {
+   return Math.floor(milli / milliInWeek);
+}
+function jsDateFromEpochWeek(weekN) {
+   return new Date(weekN*milliInWeek);
 }
