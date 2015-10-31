@@ -31,6 +31,7 @@ function dayNumToName(day) {
 milliInDay = 1000 * 60 * 60 * 24;
 milliInWeek = milliInDay * 7;
 function getNumWeeksSinceEpoch(milli) {
+   /*milli += milliInDay * 2;*/
    return Math.floor(milli / milliInWeek);
 }
 function jsDateFromEpochWeek(weekN) {
