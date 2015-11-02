@@ -28,6 +28,7 @@
       var today  = new Date(Date.now());
       var todayD = today.getDate(), todayM = today.getMonth();
 
+      //display every entry from logging
       for (var e in data) {
          var action = data[e]['action'];
          var comment = data[e]['comment'];
@@ -56,6 +57,7 @@
       var dateSorted = {}
       var weeklyTotal = {};
       var currWeek = -1;
+      var prevDay = 0;
 
       for (var e in data) {
          var entryDate = formatJsDate(new Date(e * 1000));
@@ -85,16 +87,30 @@
             }
          }
 
-         var weekN = getNumWeeksSinceEpoch(time); //FIXME
+         //kkkkk
+         function newWeek(newWeek, lastWeek, b) {
+            document.write('</br>' + newWeek + '...' + lastWeek + '...' + b);
+         }
+         if (prevDay != 0) {
+            if (entryDate.getDay() < prevDay.getDay())
+               newWeek(entryDate, prevDay, 0);
+
+            var timeDiff = entryDate.getTime() - prevDay.getTime();
+            if (timeDiff > milliInWeek)
+               newWeek(entryDate, prevDay, 1);
+         }
+         //end kkkkkkkk
+         /*var weekN = getNumWeeksSinceEpoch(time); //FIXME
          if (weeklyTotal[weekN] == null)
             weeklyTotal[weekN] = { 'time' : time, 'total' : 0 };
-         weeklyTotal[weekN]['total'] += totalTimeToday;
+         weeklyTotal[weekN]['total'] += totalTimeToday;*/
 
          //add stuff to daily table
          var dateTd = $('<td>').text(dayNumToName(entryDate.getDay()) + ' ' + entryDate);
          var totalTimeTd = $('<td>').text(milliToHours(totalTimeToday, 1));
          var tr = $('<tr>').append(dateTd).append(totalTimeTd);
-         dbody.append(tr); 
+         dbody.append(tr);
+         prevDay = entryDate;
       }
 
       for (var week in weeklyTotal) {
