@@ -8,18 +8,25 @@ function pow(n, p) {
    else
       return n;
 }
-function fixYear(n) {
-   return 1900 + n; //-2000 so prints 15 instead of 2015
-}
 function milliToHours(milli, round) {
    var numHours = milli / 60 / 60 / 60;
    var round = pow(10, round);
    var numHoursRounded = Math.round(round * numHours) / round;
    return numHoursRounded;
 }
+function fixYear(n) {
+   return 1900 + n; //-2000 so prints 15 instead of 2015
+}
+function fixMonth(n) {
+   return n + 1;
+}
 //converts long Date string to something like 27/04/2015
-function formatJsDate(d) {
-   return d.getDate() + '/' + (d.getMonth() + 1) + '/' + (1900 + d.getYear());
+function formatJsDate(milli) {
+   var d = new Date(milli);
+   var dayName = dayNumToName(d.getDay()) + ' ';
+   var year = fixYear(d.getYear());
+   var month = fixMonth(d.getMonth());
+   return dayName + d.getDate() + '/' + month + '/' + year;
 }
 function dayNumToName(day) {
    var days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -30,10 +37,5 @@ function dayNumToName(day) {
 
 milliInDay = 1000 * 60 * 60 * 24;
 milliInWeek = milliInDay * 7;
-function getNumWeeksSinceEpoch(milli) {
-   /*milli += milliInDay * 2;*/
-   return Math.floor(milli / milliInWeek);
-}
-function jsDateFromEpochWeek(weekN) {
-   return new Date(weekN*milliInWeek);
-}
+
+

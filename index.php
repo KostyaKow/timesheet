@@ -56,11 +56,11 @@
 
       var dateSorted = {}
       var weeklyTotal = {};
-      var currWeek = -1;
+      var currWeekTotal = 0;
       var prevDay = 0;
 
       for (var e in data) {
-         var entryDate = formatJsDate(new Date(e * 1000));
+         var entryDate = formatJsDate(e * 1000);
          if (dateSorted[entryDate] == null)
             dateSorted[entryDate] = []
          data[e]['time'] = e;
@@ -87,74 +87,51 @@
             }
          }
 
-         //kkkkk
-         function newWeek(newWeek, lastWeek, b) {
-            document.write('</br>' + newWeek + '...' + lastWeek + '...' + b);
-         }
+         //KK NOTE: INSTEAD OF DOING weekElapsed or currDayLessThanPrev just get currDay's Friday and figure out if the date is less or greater than that since epoch.
+         //make sure to account for skipped weeks
+         function newWeek(newWeek, lastWeek, b) {$('#hello').html($('#hello').html() +  ('</br>'+newWeek+'...'+lastWeek+'...'+b));}
+
          if (prevDay != 0) {
-            if (entryDate.getDay() < prevDay.getDay())
-               newWeek(entryDate, prevDay, 0);
-
             var timeDiff = entryDate.getTime() - prevDay.getTime();
-            if (timeDiff > milliInWeek)
-               newWeek(entryDate, prevDay, 1);
+            var weekElapsed = timeDiff > milliInWeek;
+            var currDayLessThanPrev = entryDate.getDay() < prevDay.getDay();
+            if (weekElapsed || currDayLessThanPrev) {
+               //we take prevDay and figure out date of friday for same week.
+               var daysUntilFriday = 5 - prevDay.getDay();
+               var fridayDateMilli = prevDay.getTime() + milliInDay * daysUntilFriday;
+               weeklyTotal[fridayDateMilli] = currWeekTotal;
+               currWeekTotal = 0;
+            }
          }
-         //end kkkkkkkk
-         /*var weekN = getNumWeeksSinceEpoch(time); //FIXME
-         if (weeklyTotal[weekN] == null)
-            weeklyTotal[weekN] = { 'time' : time, 'total' : 0 };
-         weeklyTotal[weekN]['total'] += totalTimeToday;*/
-
+         
          //add stuff to daily table
-         var dateTd = $('<td>').text(dayNumToName(entryDate.getDay()) + ' ' + entryDate);
+         //var dateTd = $('<td>').text(dayNumToName(entryDate.getDay()) + ' ' + entryDate);
+         var dateTd = $('<td>').text(entryDate);
          var totalTimeTd = $('<td>').text(milliToHours(totalTimeToday, 1));
          var tr = $('<tr>').append(dateTd).append(totalTimeTd);
          dbody.append(tr);
          prevDay = entryDate;
+         currWeekTotal += totalTimeToday;
       }
 
       for (var week in weeklyTotal) {
          var entry = weeklyTotal[week];
-         millis = week*milliInWeek + milliInWeek /* - 2*milliInDay*/; //FIXME kk
-         console.log(millis);
-         var weekDate = new Date(millis);
+         week = parseInt(week);
+         //newWeek(entry, week, 0);
+         var weekTd = $('<td>').text(formatJsDate(week));
 
-         var total = entry['total'];
-         var displayWeek = formatJsDate(weekDate);
-
-         var weekTd = $('<td>').text(dayNumToName(weekDate.getDay()) + ' ' + displayWeek);
-         var weekTimeTd = $('<td>').text(milliToHours(total, 2));
+         var weekTimeTd = $('<td>').text(milliToHours(entry, 2));
          var tr = $('<tr>').append(weekTd).append(weekTimeTd);
          wbody.append(tr);
-
       }
 
-      /*for (var entryDate in dateSorted) {
-         if (first) {
-            currWeek = getNumWeeksSinceEpoch(entry['time']*1000);
-            first = false;
-         }
 
-         //weekly table
-         weeklyTotal += totalTimeToday;
-         var firstEntry = currDayArr[0];
-         //var firstEntryDate = new Date(firstEntry['time'] * 1000);
-         var epochWeek = getNumWeeksSinceEpoch(firstEntry['time'] * 1000);
-         var beginningWeek = formatJsDate(jsDateFromEpochWeek(epochWeek));
-         document.write(beginningWeek + ' ');
-         if (currWeek != epochWeek) { //gotta get down on Friday
-            var weekTd = $('<td>').text(beginningWeek);
-            var weekTimeTd = $('<td>').text(milliToHours(weeklyTotal, 2));
-            var tr = $('<tr>').append(weekTd).append(weekTimeTd);
-            wbody.append(tr);
-            weeklyTotal = 0;
-            currWeek = epochWeek;
-         }
-      }*/
    }
    </script>
 </head>
 <body>
+   <div id='hello'></div>
+
    <center style='padding-top: 10px'>
       <input type='text' id='comment'>
       <button id='clockin' class='tbtn'>Clock in!</button>
