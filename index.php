@@ -114,6 +114,7 @@
          currWeekTotal += totalTimeToday;
       }
 
+      //add stuff weekly table
       for (var week in weeklyTotal) {
          var entry = weeklyTotal[week];
          week = parseInt(week);
