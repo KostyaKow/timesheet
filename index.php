@@ -22,6 +22,7 @@
    });
 
    function addTableStuff(data) {
+      var first = false;
       var data = $.parseJSON(data);
       var t = $('#timeTable');
       var tbody = t.find('tbody');
@@ -54,7 +55,7 @@
 
       //////////////////////////////////////////
       var dailyTable = $('#daily-sum');
-      var dbody = dailyTable.find('tbody');
+      var dbody = dailyTable.find('#secondtbody'); //tbody
 
       var weeklyTable = $('#weekly-sum');
       var wbody = weeklyTable.find('tbody');
@@ -165,8 +166,15 @@
 
    <div class='section'>Daily summary</div>
    <table class='table table-hover' id='daily-sum'>
-      <th>Day</th>
-      <th>Total hours</th>
+      <a>
+      <tr>
+         <th>Day</th>
+         <th>Total hours</th>
+      </tr>
+      </a>
+      <tbody id='secondtbody'>
+
+      </tbody>
    </table>
 
    <div class='section'>Log</div>
@@ -189,7 +197,7 @@
       //print($data_raw);
       //$start = 1444156418;
       print time(); */
-      print "<script>addTableStuff('" . $data_raw . "')</script>";
+      print "<script>$(function() {addTableStuff('" . $data_raw . "') })</script>";
    ?>
 
 </body>
